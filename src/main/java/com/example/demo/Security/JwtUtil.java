@@ -1,52 +1,78 @@
+
 package com.example.demo.Security;
 
-
+import com.example.demo.Entity.UserRoles;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import com.example.demo.Entity.UserRoles;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final long EXPIRATION_TIME = 1000*60*30; //0.5hour
-    private final String SECRETE_KEY =  "a8f9c3e7b1d4a6f92c8e5f7a1b3d6c9e8f2a4b6c7d9e1f3a5c7b9d2e4f6a8c1";
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRETE_KEY.getBytes());
 
-    public String generateToken(String userName, UserRoles role) {
+    // Token expiration time: 30 minutes
+    private static final long EXPIRATION_TIME = 1000 * 60 * 30;
+
+    // Secret key (minimum 32 bytes for HS256)
+    private static final String SECRET_KEY =
+            "replace-this-with-a-new-random-secret-key-of-at-least-32-bytes";
+
+    private final SecretKey key = Keys.hmacShaKeyFor(
+            SECRET_KEY.getBytes(StandardCharsets.UTF_8)
+    );
+
+    // Generate JWT Token
+    public String generateToken(String username, UserRoles role) {
+
+        Date now = new Date();
+
         return Jwts.builder()
-                .setSubject(userName)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+EXPIRATION_TIME))
-                .claim("role", role)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject(username)
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + EXPIRATION_TIME))
+                .claim("role", role.name())
+                .signWith(key)
                 .compact();
     }
 
-    private Claims extractClaims(String token){
+    // Extract all claims from token
+    private Claims extractClaims(String token) {
+
         return Jwts.parser()
-                .setSigningKey(key)
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    public String extractUsername(String token){
+    // Extract username
+    public String extractUsername(String token) {
+
         return extractClaims(token).getSubject();
     }
 
-    private boolean isTokenExpired(String token){
-        return extractClaims(token).getExpiration().before(new Date(System.currentTimeMillis()));
-    }
+    // Validate JWT token
+    public boolean isTokenValid(
+            String username,
+            UserDetails user,
+            String token
+    ) {
 
-    public boolean isTokenValid(String userName, UserDetails user, String token){
-        return userName.equals(user.getUsername()) && !isTokenExpired(token);
-    }
+        try {
 
+            Claims claims = extractClaims(token);
+
+            return username.equals(user.getUsername())
+                    && claims.getExpiration().after(new Date());
+
+        } catch (Exception e) {
+
+            return false;
+        }
+    }
 }
