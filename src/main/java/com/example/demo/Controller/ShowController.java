@@ -37,9 +37,9 @@ public class ShowController {
         showService.deleteShowById(id);
     }
 
-    @PutMapping("/{id}")
-    public Show updateShow(@RequestBody ShowDto showDto,Long id){
-        return showService.updateShow(showDto, id);
-    }
+//    @PutMapping("/{id}")
+//    public Show updateShow(@RequestBody ShowDto showDto,Long id){
+//        return showService.updateShow(showDto, id);
+//    }
 
 }

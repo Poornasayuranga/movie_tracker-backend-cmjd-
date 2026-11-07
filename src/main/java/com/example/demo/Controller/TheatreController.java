@@ -25,7 +25,7 @@ public class TheatreController {
     }
 
     @GetMapping("/{id}")
-    public Theatre getTheatreById(@PathVariable Long id){
+    public Theatre getTheatreById(@PathVariable String id){
         return theatreService.getTheatreById(id);
     }
 
@@ -35,12 +35,12 @@ public class TheatreController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTheatre(@PathVariable Long id){
+    public void deleteTheatre(@PathVariable String id){
         theatreService.deleteTheatre(id);
     }
 
     @PutMapping
-    public Theatre updateTheatre(@RequestBody TheatreDto theatreDto, @PathVariable Long id){
+    public Theatre updateTheatre(@RequestBody TheatreDto theatreDto, @PathVariable String id){
         return theatreService.updateTheatre(theatreDto, id);
     }
 

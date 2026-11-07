@@ -30,7 +30,7 @@ public class TheatreService {
         return theatreRepository.save(theatre);
     }
 
-    public Theatre getTheatreById(long theatreId) {
+    public Theatre getTheatreById(String theatreId) {
         return theatreRepository.findById(theatreId)
                 .orElseThrow(() ->
                         new RuntimeException(
@@ -45,7 +45,7 @@ public class TheatreService {
         return theatreRepository.findAll();
     }
 
-    public Theatre updateTheatre(TheatreDto theatreDto, long theatreId){
+    public Theatre updateTheatre(TheatreDto theatreDto, String theatreId){
         Theatre existTheatre = theatreRepository.findById(theatreId)
                 .orElseThrow(() ->
                         new RuntimeException(
@@ -60,7 +60,7 @@ public class TheatreService {
         return theatreRepository.save(existTheatre);
     }
 
-    public void deleteTheatre(long theatreId){
+    public void deleteTheatre(String theatreId){
         theatreRepository.deleteById(theatreId);
     }
 

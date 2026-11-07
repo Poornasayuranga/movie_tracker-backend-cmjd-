@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long iD;
+    private Long id;
     private String title;
     private String description;
     private String language;
@@ -19,11 +19,11 @@ public class Movie {
 
 
     public Long getID() {
-        return iD;
+        return id;
     }
 
     public void setID(Long id) {
-        this.iD = iD;
+        this.id = id;
     }
 
     public String getTitle() {

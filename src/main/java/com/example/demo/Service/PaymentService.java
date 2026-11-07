@@ -74,7 +74,7 @@ public class PaymentService {
             ShowDto showDto, BookingDto bookingDto) {
 
 
-        Show show = showRepository.findById(showDto.getShowId())
+        Show show = showRepository.findById(showDto.getId())
                 .orElseThrow(() ->
                         new RuntimeException("Show not found"));
 
