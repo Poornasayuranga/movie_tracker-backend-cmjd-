@@ -1,5 +1,10 @@
 package com.example.demo.Entity;
 import jakarta.persistence.*;
+import java.util.List;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Column;
 
 
 @Entity
@@ -10,12 +15,19 @@ public class Booking {
     private Long bookingId;
     private Long userId;
     private String bookingDate;
-    private int seatNumbers ;
+//    private int seatNumbers ;
     private int numberOfTickets;
     private double totalAmount;
     @ManyToOne
     @JoinColumn(name = "show_id", nullable = false)
     private Show show;
+    @ElementCollection
+    @CollectionTable(
+            name = "booking_seats",
+            joinColumns = @JoinColumn(name = "booking_id")
+    )
+    @Column(name = "seat_number")
+    private List<Integer> seatNumbers;
 
 
 
@@ -51,13 +63,13 @@ public class Booking {
         this.bookingDate = bookingDate;
     }
 
-    public int getSeatNumbers() {
-        return seatNumbers;
-    }
+//    public int getSeatNumbers() {
+//        return seatNumbers;
+//    }
 
-    public void setSeatNumbers(int seatNumbers) {
-        this.seatNumbers = seatNumbers;
-    }
+//    public void setSeatNumbers(int seatNumbers) {
+//        this.seatNumbers = seatNumbers;
+//    }
 
     public int getNumberOfTickets() {
         return numberOfTickets;
@@ -73,6 +85,14 @@ public class Booking {
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public List<Integer> getSeatNumbers() {
+        return seatNumbers;
+    }
+
+    public void setSeatNumbers(List<Integer> seatNumbers) {
+        this.seatNumbers = seatNumbers;
     }
 
 }

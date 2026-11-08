@@ -6,6 +6,7 @@ import com.example.demo.Entity.Booking;
 import com.example.demo.Repository.BookingRepository;
 import com.example.demo.Service.BookingService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -45,6 +46,16 @@ public class BookingController {
     @PutMapping
     public Booking updateBooking(@RequestBody BookingDto bookingDto, @PathVariable Long id) {
         return bookingService.updateBooking(bookingDto,id);
+    }
+
+
+    @GetMapping("/remaining-seats/{showId}")
+    public ResponseEntity<Integer> getRemainingSeats(
+            @PathVariable Long showId) {
+
+        int remainingSeats = bookingService.getRemainingSeats(showId);
+
+        return ResponseEntity.ok(remainingSeats);
     }
 
 

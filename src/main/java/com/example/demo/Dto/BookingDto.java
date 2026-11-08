@@ -3,6 +3,7 @@ package com.example.demo.Dto;
 import com.example.demo.Entity.Show;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import java.util.List;
 import lombok.NoArgsConstructor;
 
 
@@ -15,7 +16,8 @@ public class BookingDto {
     private Long bookingId;
     private Long userId;
     private String bookingDate;
-    private int seatNumbers ;
+//    private int seatNumbers ;
+    private List<Integer> seatNumbers;
     private int numberOfTickets;
     private double totalAmount;
     private Long  showId;
@@ -46,13 +48,13 @@ public class BookingDto {
         this.bookingDate = bookingDate;
     }
 
-    public int getSeatNumbers() {
-        return seatNumbers;
-    }
-
-    public void setSeatNumbers(int seatNumbers) {
-        this.seatNumbers = seatNumbers;
-    }
+//    public int getSeatNumbers() {
+//        return seatNumbers;
+//    }
+//
+//    public void setSeatNumbers(int seatNumbers) {
+//        this.seatNumbers = seatNumbers;
+//    }
 
     public int getNumberOfTickets() {
         return numberOfTickets;
@@ -68,6 +70,14 @@ public class BookingDto {
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public List<Integer> getSeatNumbers() {
+        return seatNumbers;
+    }
+
+    public void setSeatNumbers(List<Integer> seatNumbers) {
+        this.seatNumbers = seatNumbers;
     }
 
     public Long getShowId() {

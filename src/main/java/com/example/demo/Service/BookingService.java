@@ -1,8 +1,10 @@
+
 package com.example.demo.Service;
 
 import com.example.demo.Dto.BookingDto;
 import com.example.demo.Entity.Booking;
 import com.example.demo.Entity.Show;
+import com.example.demo.Entity.Theatre;
 import com.example.demo.Repository.BookingRepository;
 import com.example.demo.Repository.ShowRepository;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,6 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ShowRepository showRepository;
 
-
     public BookingService(
             BookingRepository bookingRepository,
             ShowRepository showRepository) {
@@ -24,89 +25,147 @@ public class BookingService {
         this.showRepository = showRepository;
     }
 
-
-    // CREATE
+    // CREATE BOOKING
     public Booking createBooking(BookingDto dto) {
 
+        Show show = showRepository.findById(dto.getShowId())
+                .orElseThrow(() ->
+                        new RuntimeException("Show not found"));
+
+        // Get theatre capacity
+        Theatre theatre = show.getTheatre();
+
+        int capacity = theatre.getCapacity();
+
+        // Get total booked tickets
+        int bookedTickets =
+                bookingRepository.getTotalBookedTickets(show.getId());
+
+        // Calculate remaining seats
+        int remainingSeats = capacity - bookedTickets;
+
+        // Validate ticket count
+        if (dto.getNumberOfTickets() <= 0) {
+            throw new RuntimeException(
+                    "Ticket count must be greater than zero");
+        }
+
+        if (dto.getNumberOfTickets() > remainingSeats) {
+            throw new RuntimeException(
+                    "Not enough seats available. Remaining seats: "
+                            + remainingSeats);
+        }
+
+        // Validate seat numbers
+        if (dto.getSeatNumbers() == null ||
+                dto.getSeatNumbers().size() != dto.getNumberOfTickets()) {
+
+            throw new RuntimeException(
+                    "Seat numbers must match the ticket count");
+        }
+
+        // Create booking
         Booking booking = new Booking();
 
         booking.setUserId(dto.getUserId());
         booking.setBookingDate(dto.getBookingDate());
         booking.setNumberOfTickets(dto.getNumberOfTickets());
         booking.setSeatNumbers(dto.getSeatNumbers());
-        booking.setTotalAmount(dto.getTotalAmount());
-
-        Show show = showRepository.findById(dto.getShowId())
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Show not found with id: " + dto.getShowId()
-                        )
-                );
-
         booking.setShow(show);
+
+        // Calculate total amount using backend
+        booking.setTotalAmount(
+                dto.getNumberOfTickets() * show.getTicketPrice()
+        );
 
         return bookingRepository.save(booking);
     }
 
-
-    // UPDATE
-    public Booking updateBooking(BookingDto bookingDto, Long id) {
+    // UPDATE BOOKING
+    public Booking updateBooking(BookingDto dto, Long id) {
 
         Booking existBooking = bookingRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Booking not found with id: " + id
-                        )
-                );
+                        new RuntimeException("Booking not found"));
 
-        existBooking.setBookingDate(bookingDto.getBookingDate());
-        existBooking.setNumberOfTickets(bookingDto.getNumberOfTickets());
-        existBooking.setSeatNumbers(bookingDto.getSeatNumbers());
-        existBooking.setTotalAmount(bookingDto.getTotalAmount());
-
-        Show show = showRepository.findById(bookingDto.getShowId())
+        Show show = showRepository.findById(dto.getShowId())
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Show not found with id: "
-                                        + bookingDto.getShowId()
-                        )
-                );
+                        new RuntimeException("Show not found"));
 
+        int capacity = show.getTheatre().getCapacity();
+
+        int bookedTickets =
+                bookingRepository.getTotalBookedTickets(show.getId());
+
+        // Exclude the current booking if updating the same show
+        if (existBooking.getShow().getId().equals(show.getId())) {
+            bookedTickets -= existBooking.getNumberOfTickets();
+        }
+
+        int remainingSeats = capacity - bookedTickets;
+
+        if (dto.getNumberOfTickets() <= 0 ||
+                dto.getNumberOfTickets() > remainingSeats) {
+
+            throw new RuntimeException(
+                    "Invalid ticket count. Remaining seats: "
+                            + remainingSeats);
+        }
+
+        if (dto.getSeatNumbers() == null ||
+                dto.getSeatNumbers().size() != dto.getNumberOfTickets()) {
+
+            throw new RuntimeException(
+                    "Seat numbers must match the ticket count");
+        }
+
+        existBooking.setBookingDate(dto.getBookingDate());
+        existBooking.setNumberOfTickets(dto.getNumberOfTickets());
+        existBooking.setSeatNumbers(dto.getSeatNumbers());
         existBooking.setShow(show);
+
+        existBooking.setTotalAmount(
+                dto.getNumberOfTickets() * show.getTicketPrice()
+        );
 
         return bookingRepository.save(existBooking);
     }
 
-
-    // DELETE
+    // DELETE BOOKING
     public void deleteById(Long id) {
 
         Booking existBooking = bookingRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Booking not found with id: " + id
-                        )
-                );
+                        new RuntimeException("Booking not found"));
 
         bookingRepository.delete(existBooking);
     }
 
-
-    // GET ALL
+    // GET ALL BOOKINGS
     public List<Booking> getAllBooking() {
-
         return bookingRepository.findAll();
     }
 
-
-    // GET BY ID
+    // GET BOOKING BY ID
     public Booking getBookingById(Long id) {
 
         return bookingRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Booking not found with id: " + id
-                        )
-                );
+                        new RuntimeException("Booking not found"));
+    }
+
+    // GET REMAINING SEATS FOR A SHOW
+    public int getRemainingSeats(Long showId) {
+
+        Show show = showRepository.findById(showId)
+                .orElseThrow(() ->
+                        new RuntimeException("Show not found"));
+
+        int capacity = show.getTheatre().getCapacity();
+
+        int bookedTickets =
+                bookingRepository.getTotalBookedTickets(showId);
+
+        return capacity - bookedTickets;
     }
 }
